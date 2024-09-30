@@ -4,8 +4,10 @@ import 'package:bank_calculator/screens/home_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:slider_button/slider_button.dart';
+import 'package:get_storage/get_storage.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -15,6 +17,7 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
+  var box = GetStorage();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,7 +27,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(AppAssets().welcome, height: Get.height/1.9,),
+              Animate(
+                effects: [SlideEffect(duration: Duration(seconds: 1))],
+                  child: Image.asset(AppAssets().welcome, height: Get.height/1.9,)),
               SizedBox(height: 30,),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,7 +38,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   SizedBox(height: 5,),
                   Text("Your Smart Finance Assistant", style: Theme.of(context).textTheme.displayMedium, textAlign: TextAlign.start,),
                   SizedBox(height: 10,),
-                  Text("Calculate loan interests, manage currencies, and handle financial operations effortlessly.",
+                  Text("Calculate loan interests and handle financial operations effortlessly.",
                     style: Theme.of(context).textTheme.titleMedium!.copyWith(wordSpacing: 1, height: 1.6), textAlign: TextAlign.start, ),
                   SizedBox(height: 70),
                   SliderButton(
@@ -44,6 +49,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     buttonColor: AppColor().orangeColor,
                     backgroundColor: Theme.of(context).cardColor,
                     action: () async {
+                      box.write("intro", true);
                       Get.offAll(()=> HomeScreen(), transition: Transition.cupertino);
                       HapticFeedback.selectionClick();
                     },

@@ -1,177 +1,145 @@
-import 'package:bank_calculator/constants/colors.dart';
-import 'package:bank_calculator/screens/payment_shedule.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../constants/texts.dart';
 import '../controllers/calculator_controller.dart';
+import '../constants/colors.dart';
+import '../constants/texts.dart';
+import 'payment_shedule.dart';
 
 class ResultScreen extends StatelessWidget {
   final CalculatorController controller = Get.put(CalculatorController());
 
   @override
   Widget build(BuildContext context) {
-    var _w = MediaQuery.of(context).size.width;
-    var _h = MediaQuery.of(context).size.height;
-
     return Scaffold(
       appBar: AppBar(
-        // title: Text(AppTexts().appTitle, style: Theme.of(context).textTheme.displayLarge,),
+        title: Text(AppTexts().paymentTable, style: Theme.of(context).textTheme.titleLarge),
+        iconTheme: IconThemeData(color: AppColor().orangeAccentColor),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Get.to(() => PaymentSchedulePage(payments: controller.paymentSchedule), fullscreenDialog: true);
+            },
+            icon: Icon(Icons.table_chart_outlined),
+          )
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            Container(
-              alignment: Alignment.center,
-              width: _w,
-              height: _h/5,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(25),
-                  gradient: LinearGradient(colors: [AppColor().orangeColor, Colors.red])
-              ),
-              child: Text(
-                controller.krediTutari.value.toString(),
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            ),
-            SizedBox(height: 10,),
-            TextField(
-              onChanged: (value) => controller.krediTutari.value = double.tryParse(value) ?? 0.0,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        width: 3
-                    )
+      body: Obx(() {
+      var paymentSchedule = controller.paymentSchedule;
+
+      return paymentSchedule.length != 0 
+          ? ListView.builder(
+        itemCount: paymentSchedule.length,
+        itemBuilder: (context, index) {
+          var payment = paymentSchedule[index];
+          return Stack(
+            children: [
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 5, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                labelText: AppTexts().creditAmount,
-              ),
-              keyboardType: TextInputType.number,
-            ),
-
-            // Faiz Oranı
-            TextField(
-              onChanged: (value) => controller.faizOrani.value = double.tryParse(value) ?? 0.0,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: AppTexts().interestRate,
-              ),
-              keyboardType: TextInputType.number,
-            ),
-            // Vade Süresi
-            TextField(
-              onChanged: (value) => controller.vadeSuresi.value = int.tryParse(value) ?? 0,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: AppTexts().loanTerm,
-              ),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 20),
-
-            // Başlangıç Tarihi
-            Obx(() {
-              return TextField(
-                controller: TextEditingController(
-                  text: controller.baslangicTarihi.value.toLocal().toString().split(' ')[0], // YYYY-MM-DD formatı
-                ),
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: "DateTime",
-                  hintText: 'YYYY-MM-DD',
-                ),
-                readOnly: true,
-                onTap: () => _selectDate(context),
-              );
-            }),
-
-            SizedBox(height: 20),
-
-            // Komisyon Tipi Dropdown
-            Obx(() => DropdownButton<String>(
-              value: controller.selectedKomisyonTipi.value,
-              items: controller.komisyonTipleri.map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                if (newValue != null) {
-                  controller.selectedKomisyonTipi.value = newValue;
-                }
-              },
-            )),
-
-            // Komisyon Tutarı/Oranı Girişi
-            Obx(() {
-              if (controller.selectedKomisyonTipi.value != AppTexts().noCommission) {
-                return TextField(
-                  onChanged: (value) => controller.komisyonTutari.value = double.tryParse(value) ?? 0.0,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: controller.selectedKomisyonTipi.value == AppTexts().interestCommission
-                        ? AppTexts().commissionRate
-                        : AppTexts().commissionAmount,
+                child:  ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: AppColor().orangeAccentColor,
+                    child: Text(
+                      payment['month'].toString(),
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(color: AppColor().scaffColor),
+                    ),
                   ),
-                  keyboardType: TextInputType.number,
-                );
-              } else {
-                return Container();
-              }
-            }),
-
-            SizedBox(height: 20),
-
-            // Hesapla Butonu
-            ElevatedButton(
-              onPressed: () {
-                controller.hesaplaKredi();
-                _showBottomSheet(context);
-              },
-              child: Text(AppTexts().calculate),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    DateTime? selectedDate = await showDatePicker(
-      context: context,
-      initialDate: controller.baslangicTarihi.value,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
-
-    if (selectedDate != null && selectedDate != controller.baslangicTarihi.value) {
-      controller.baslangicTarihi.value = selectedDate;
-    }
-  }
-
-  void _showBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text('${AppTexts().monthlyPayment}: ${controller.aylikOdeme.value.toStringAsFixed(2)}₺'),
-              Text('${AppTexts().totalInterest}: ${controller.toplamFaizParasi.value.toStringAsFixed(2)}₺'),
-              Text('${AppTexts().totalPayment}: ${controller.toplamOdeme.value.toStringAsFixed(2)}₺'),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Kapatma
-                  Get.to(() => PaymentSchedulePage(payments: controller.generatePaymentSchedule()));
-                },
-                child: Text('Kredi Tablosu Görüntüle'),
+                  title: Obx(()=>
+                      Text(
+                      // Eğer ek ödeme varsa onu göster, yoksa aylık ödeme miktarını göster
+                      paymentSchedule[index].containsKey('extraPayment')
+                          ? 'Extra Payment: ${payment['extraPayment'].toStringAsFixed(2)}'
+                          : (payment['interest'] + payment['principal']).toStringAsFixed(2),
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColor().orangeColor,
+                          fontSize: 20),
+                    ),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Interest: ${payment['interest'].toStringAsFixed(2)}',
+                        style: TextStyle(fontSize: 16, color: Colors.white54, fontWeight: FontWeight.w400),
+                      ),
+                      Text(
+                        'Principal: ${payment['principal'].toStringAsFixed(2)}',
+                        style: TextStyle(fontSize: 15, color: Colors.white54),
+                      ),
+                      Text(
+                        'Remaining Debt: ${payment['remaining'].toStringAsFixed(2)}',
+                        style: TextStyle(fontSize: 15, color: Colors.white54),
+                      ),
+                    ],
+                  ),
+                  trailing: IconButton(
+                    color: AppColor().orangeAccentColor,
+                    icon: Icon(Icons.add),
+                    onPressed: () {
+                      _showExtraPaymentDialog(context, index, payment['remaining']);
+                    },
+                  ),
+                )),
+              Positioned(
+                top: 15,
+                right: 20,
+                child: Text(
+                  '${payment['date']}',
+                  style: TextStyle(fontSize: 14, color: Colors.white38),
+                ),
               ),
             ],
+          );
+        },
+      )
+          : Center(child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.info_outlined, color: AppColor().orangeColor, ),
+              Text("Not found", style: TextStyle(fontSize: 28, color: AppColor().orangeAccentColor, )),
+            ],
+          ));
+    }),
+    );
+  }
+
+  void _showExtraPaymentDialog(BuildContext context, int index, double remainingDebt) {
+    final TextEditingController extraPaymentController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(AppTexts().extraPaymentTitle, style: TextStyle(fontSize: 20, color: Colors.white),),
+          content: TextField(
+
+            style: TextStyle(fontSize: 14, color: Colors.white),
+            controller: extraPaymentController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: AppTexts().remainingHintText,
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                double extraPayment = double.tryParse(extraPaymentController.text) ?? 0.0;
+                if (extraPayment > 0) {
+                  controller.updateScheduleWithExtraPayment(extraPayment, index);
+                  Navigator.of(context).pop();
+                }
+              },
+              child: Text(AppTexts().apply),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(AppTexts().cancel),
+            ),
+          ],
         );
       },
     );

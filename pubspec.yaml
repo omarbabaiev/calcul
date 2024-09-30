@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: '>=3.4.1 <4.0.0'
@@ -33,6 +33,11 @@ dependencies:
   get: ^4.6.6
   google_fonts: ^6.2.1
   slider_button: ^2.1.0
+  smooth_corner: ^1.1.0
+  flutter_animate: ^4.5.0
+  flutter_share: ^2.0.0
+  get_storage: any
+  flutter_native_splash: ^2.4.0
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
@@ -63,6 +68,19 @@ flutter:
   assets:
     - assets/images/welcome.png
     - assets/images/moneys.png
+flutter_native_splash:
+  color: "#2a1613" # Background color of the splash screen.
+  image: assets/images/splash_logo.png # Path to your splash image.
+  android: true   # Enable splash for Android
+  ios: true       # Enable splash for iOS
+  web: false      # Disable splash for Web (Optional)
+  android_gravity: center  # Position of the image on Android (Optional)
+  ios_content_mode: center # Position of the image on iOS (Optional)
+  fullscreen: true
+  branding: assets/images/firmware.png
+  branding_mode: bottom
+
+  # Whether to use full screen (removes status bar).
 
   #   - images/a_dot_ham.jpeg
 

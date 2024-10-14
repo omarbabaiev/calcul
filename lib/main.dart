@@ -8,13 +8,12 @@ import 'package:flutter/services.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 
 void main() async{
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
 
 
   SystemChrome.setSystemUIOverlayStyle(
@@ -23,7 +22,6 @@ void main() async{
     statusBarColor: AppColor().scaffColor, // Set to any color you like
     statusBarIconBrightness: Brightness.light, // White status bar icons
   ));
-  FlutterNativeSplash.remove();
   runApp(CalCul());
 }
 
